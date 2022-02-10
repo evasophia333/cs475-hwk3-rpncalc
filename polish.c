@@ -1,30 +1,29 @@
-// TODO implementation of evaluate() goes here
+/**
+ * Evaulation for an RPN calculator
+ * Author: Eva Sophia Shimanski 
+ */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include "stack.h"
 
-//evaulates the user input
-void evaulate(char input[])
+/**
+ * Evaluates RPN expression
+ * @param input pointer to the user input
+ */
+void evaulate(char *input)
 {
-    //check element, if number then push and have a counter to make sure there are
-    //more than two numbers
-    //if not a number then if there have been two previous numbers pop them off
-    //and either add, sub, div (check zero), or multiply
-    //if other then print invalid input
     struct Node *head = NULL;
-    char delim[] = " ";
-    char space = " ";
-    char* ptr = strtok(input, "\t");
-
+    char* ptr = NULL;
+    ptr = strtok(input, " \n\t"); //split input by space, tab or new line
     while (ptr != NULL)
     {
-        printf("\nElement: %d\n",*ptr);
-        if (*ptr == '+')
+        if (*ptr == '+') //addition
         { 
-            if (size() < 2)
+            if (size() < 2) //catch too few numbers
             {
-                printf("Error: insufficient operands");
+                printf("Error: insufficient operands\n");
+                emptyStack(&head);
                 return;
             }
             else
@@ -33,25 +32,27 @@ void evaulate(char input[])
                 push(&head, result);
             }
         }
-        else if (*ptr == '-')
+        else if (*ptr == '-') //subtraction
         {
-            if (size() < 2)
+            if (size() < 2) //catch too few numbers
             {
-                printf("Error: insufficient operands");
-                printf("%d", size());
+                printf("Error: insufficient operands\n");
+                emptyStack(&head);
                 return;
             }
             else
             {
-                double result = pop(&head) - pop(&head);
+                double elem1 = pop(&head);
+                double result = pop(&head) - elem1;
                 push(&head, result);
             }
         }
         else if (*ptr == '*')
         {
-            if (size() < 2)
+            if (size() < 2) //catch too few numbers
             {
-                printf("Error: insufficient operands");
+                printf("Error: insufficient operands\n");
+                emptyStack(&head);
                 return;
             }
             else
@@ -64,15 +65,17 @@ void evaulate(char input[])
         {
             if (size() < 2)
             {
-                printf("Error: insufficient operands");
+                printf("Error: insufficient operands\n");
+                emptyStack(&head);
                 return;
             }
             else
             {
                 double elem1 = pop(&head);
-                if (elem1 == 0)
+                if (elem1 == 0) //catch divide by zero error
                 {
-                    printf("Error: Divide by zero! Not possible.");
+                    printf("Error: Divide by zero! Not possible.\n");
+                    emptyStack(&head);
                     return;
                 }
                 else
@@ -82,19 +85,26 @@ void evaulate(char input[])
                 }
             }
         }
-        else
+        else if(isdigit(*ptr)) //add numbers
         {
-            push(&head, *ptr - 48);
+            double num = atof(ptr);
+            push(&head, num);
+        }else
+        {
+            printf("Error: Unknown Character %c\n",*ptr);
+            emptyStack(&head);
+            return;
         }
-        ptr = strtok(NULL, " ");
+        ptr = strtok(NULL, " \n\t");
     }
-    if (size() == 1)
+    if (size() == 1) //print the list and empty the stack
     {
         printList(head);
+        emptyStack(&head); 
     }
-    else
+    else //too many numbers print error and empty stack
     {
-        printf("\n Error: too many operands");
-        printf("%d",size());
+        printf("\n Error: too many operands\n");
+        emptyStack(&head);
     }
 }
