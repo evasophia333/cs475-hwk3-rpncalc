@@ -30,17 +30,12 @@ int main()
 	// points to the head node of the linked list
 	*/
 	struct Node *head = NULL;
-	push(&head, 7);
-    push(&head, 1);
-    push(&head, 3);
-    push(&head, 2);
-
-	printf("before pop:");
-	printList(head); //print list before the pop
-	int i = pop(&head);
-	printf("\nThe popped node is %d\n", i);
-
+	//push(&head, 7);
+	//push(&head, 1);
+	//push(&head, '+');
+	char keys[22] = "10\t4\t-";
+	evaulate(keys);
 	//print remaining linked list
-	printList(head);
+
 	return 0;
 }
