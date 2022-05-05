@@ -1,0 +1,1 @@
+void rag_request(int pid, int lockid);
