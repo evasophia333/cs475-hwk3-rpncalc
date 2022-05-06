@@ -9,6 +9,7 @@
  */
 
 #include <stdio.h>
+#include <stdlib.h>
 #include "DDetect.h"
 
 
@@ -42,7 +43,7 @@ int main(int argc, char *argv[])
         printf("%d %c %d\n", pid, event, lockid);
 		if (event == 'R')
 		{
-			
+
 		}
 		else if (event == 'A')
 		{
