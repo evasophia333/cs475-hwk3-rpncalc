@@ -1,11 +1,8 @@
-all: main.c stack.o polish.o
-	gcc -Wall -o rpncalc main.c polish.o stack.o
+all: main.c DDetect.o
+	gcc -Wall -o Deadlock main.c DDetect.o
 
-polish.o: polish.h polish.c
-	gcc -Wall -c polish.c
-
-stack.o: stack.h stack.c
-	gcc -Wall -c stack.c
+DDetect.o: DDetect.h DDetect.c
+	gcc -Wall -c DDetect.c
 
 clean:
-	rm -f rpncalc *.o
+	rm -f Deadlock *.o
