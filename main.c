@@ -14,7 +14,7 @@
 
 
 /*
-* Excecutes the user input for an RNP calculator
+* Main method and file handling for Deadlock Detection algorithm
 */
 int main(int argc, char *argv[])
 {
@@ -33,7 +33,12 @@ int main(int argc, char *argv[])
 		exit(1);
 	}
 
-	// initialize graph etc
+	// TODO initialize graph
+	Graph *g = createGraph();
+	printf("Created graph\n");
+	rag_print(g);
+
+	
 
 	int pid;
 	char event;
@@ -43,17 +48,19 @@ int main(int argc, char *argv[])
         printf("%d %c %d\n", pid, event, lockid);
 		if (event == 'R')
 		{
-
+			rag_request(g, pid, lockid);
 		}
 		else if (event == 'A')
 		{
-
+			rag_alloc(g, pid, lockid);
 		}
 		else if (event == 'D')
 		{
-
+			rag_dealloc(g, pid, lockid);
 		}
     }
+
+	rag_print(g);
 
     fclose(file);
 	return 0;
