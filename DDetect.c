@@ -7,6 +7,8 @@
 #define LOCK 0
 #define PROC 1
 
+int cycleNumber = 0;
+
 typedef struct AdjListNode {
     int id;
     int lockOrProc;
@@ -127,13 +129,17 @@ void rag_alloc(Graph *graph, int pid, int lockid)
     int i;
     for (i = NPROC; i < (NPROC + NLOCK); i++)
     {
-        if (graph->array[i].id == lockid){
+        printf("%d\n",lockid);
+        printf("%d\n",graph->array[i].id);
+        if (graph->array[i].id == (lockid + NPROC)){
+            printf("Hellor\n");
             // figure out where in it's list to put it
             newNode->next = graph->array[i].head;
             graph->array[i].head = newNode;
         }
     }
 
+    /*
     // remove request edge
     AdjListNode *check = NULL;
     AdjListNode *prev = NULL;
@@ -162,6 +168,7 @@ void rag_alloc(Graph *graph, int pid, int lockid)
             }
         }
     }
+    */
 }
 
 /**
@@ -210,11 +217,12 @@ void rag_print(Graph *graph)
     printf("Printing...\n");
     int i;
     AdjListNode *check = NULL;
-    for ( i = 0; i < NPROC; i++)
+    //for (i = 0; i < NPROC; i++)
+    for ( i = 0; i < 5; i++)
     {
         check = graph->array[i].head;
         printf("Node pid=%d -> { ", i);
-        while (check->next != NULL)
+        while (check != NULL)
         {
             printf("lockid=%d ", check->id);
             check = check->next;
@@ -222,11 +230,12 @@ void rag_print(Graph *graph)
         printf(" }\n");
     }
 
-    for ( i = NPROC; i < (NPROC + NLOCK); i++)
+    //for ( i = NPROC; i < (NPROC + NLOCK); i++)
+    for ( i = 5; i < 8; i++)
     {
         check = graph->array[i].head;
         printf("Node lockid=%d -> { ", i);
-        while (check->next != NULL)
+        while (check != NULL)
         {
             printf("pid=%d ", check->id);
             check = check->next;
@@ -243,3 +252,36 @@ void deadlock_detect(Graph *graph)
 {
     //
 }
+
+/*
+int icCycle(int i, int *visited, int *recStack, Graph *graph)
+{
+    if (recStack[i])
+    {
+        return 1; // true
+    }
+
+    if (visited[i])
+    {
+        return 0; // false
+    }
+
+    visited[i] = 1;
+
+    recStack[i] = 1;
+    AdjList *array = graph->array[i];
+
+    AdjListNode *check = array->head;
+    while (check != NULL)
+    {
+        if (isCycle(check->id, visited, recStack, graph))
+        {
+            return 1;
+        }
+
+        check = check->next;
+    }
+    recStack[i] = 0;
+    return 0;
+}
+*/

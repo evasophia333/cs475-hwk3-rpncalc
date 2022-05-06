@@ -48,16 +48,20 @@ int main(int argc, char *argv[])
         printf("%d %c %d\n", pid, event, lockid);
 		if (event == 'R')
 		{
+			printf("Requesting...\n");
 			rag_request(g, pid, lockid);
 		}
 		else if (event == 'A')
 		{
+			printf("Allocating...\n");
 			rag_alloc(g, pid, lockid);
 		}
 		else if (event == 'D')
 		{
+			printf("Releasing...\n");
 			rag_dealloc(g, pid, lockid);
 		}
+		rag_print(g);
     }
 
 	rag_print(g);
