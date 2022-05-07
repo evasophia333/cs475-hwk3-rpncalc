@@ -302,7 +302,7 @@ int deadlock_detect(Graph *g)
                 check = check->next;
             }
             printf("\n");
-            /*
+            
             check = stack->head;
             while (check != NULL)
             {
@@ -311,7 +311,6 @@ int deadlock_detect(Graph *g)
                 check = stack->head;
             }
             free(stack);
-            */
             return 1;
         }
     }
@@ -350,13 +349,18 @@ int isCycle(int i, int *visited, int *recStack, Graph *graph)
 
     AdjListNode *check = array[i].head;
 
+    
     // add node to stack
-    AdjListNode *stackNode = newAdjListNode(check->id, check->lockOrProc);
-    stackNode->next = stack->head;
-    stack->head = stackNode;
+    //AdjListNode *stackNode = newAdjListNode(check->id, check->lockOrProc);
+    //stackNode->next = stack->head;
+    //stack->head = stackNode;
+    
 
     while (check != NULL)
     {
+        AdjListNode *stackNode = newAdjListNode(check->id, check->lockOrProc);
+        stackNode->next = stack->head;
+        stack->head = stackNode;
         int iCalc = check->id;
         if (check->lockOrProc == LOCK)
         {
