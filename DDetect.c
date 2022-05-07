@@ -2,12 +2,12 @@
 #include <stdlib.h>
 
 
-#define NLOCK 10 
-#define NPROC 20 
+#define NLOCK 10
+#define NPROC 20
 #define LOCK 0
 #define PROC 1
 
-int cycleNumber = 0;
+struct AdjList* stack;
 
 typedef struct AdjListNode {
     int id;
@@ -52,6 +52,9 @@ struct Graph* createGraph()
     struct Graph* graph
         = (struct Graph*)malloc(sizeof(struct Graph));
     graph->V = NLOCK + NPROC;
+
+    stack = (struct AdjList *)malloc(sizeof(struct AdjList));
+    stack->head = NULL;
  
     // Create an array of adjacency lists.  Size of
     // array will be V
@@ -66,7 +69,7 @@ struct Graph* createGraph()
         graph->array[i].head = NULL;
     }
     for (i = NPROC; i < (NPROC + NLOCK); i++){
-        graph->array[i].id = i;
+        graph->array[i].id = i - NPROC;
         graph->array[i].lockOrProc = LOCK;
         graph->array[i].head = NULL;
     }
@@ -129,17 +132,17 @@ void rag_alloc(Graph *graph, int pid, int lockid)
     int i;
     for (i = NPROC; i < (NPROC + NLOCK); i++)
     {
-        printf("%d\n",lockid);
-        printf("%d\n",graph->array[i].id);
-        if (graph->array[i].id == (lockid + NPROC)){
-            printf("Hellor\n");
+        //printf("%d\n",lockid);
+        //printf("%d\n",graph->array[i].id);
+        if (graph->array[i].id == lockid){
+            //printf("Hellor\n");
             // figure out where in it's list to put it
             newNode->next = graph->array[i].head;
             graph->array[i].head = newNode;
         }
     }
 
-    /*
+    
     // remove request edge
     AdjListNode *check = NULL;
     AdjListNode *prev = NULL;
@@ -148,10 +151,11 @@ void rag_alloc(Graph *graph, int pid, int lockid)
         if (graph->array[i].id == pid){
             // figure out where in it's list to put it
             check = graph->array[i].head;
-            while (check->next != NULL)
+            while (check != NULL)
             {
                 if (check->id == lockid && check->lockOrProc == LOCK)
                 {
+                    //printf("we found it\n");
                     if (prev == NULL)
                     {
                         graph->array[i].head = check->next;
@@ -168,7 +172,7 @@ void rag_alloc(Graph *graph, int pid, int lockid)
             }
         }
     }
-    */
+    
 }
 
 /**
@@ -186,7 +190,7 @@ void rag_dealloc(Graph *graph, int pid, int lockid)
         if (graph->array[i].id == lockid){
             // figure out where in it's list to put it
             check = graph->array[i].head;
-            while (check->next != NULL)
+            while (check != NULL)
             {
                 if (check->id == pid && check->lockOrProc == PROC)
                 {
@@ -217,8 +221,8 @@ void rag_print(Graph *graph)
     printf("Printing...\n");
     int i;
     AdjListNode *check = NULL;
-    //for (i = 0; i < NPROC; i++)
-    for ( i = 0; i < 5; i++)
+    for (i = 0; i < NPROC; i++)
+    //for ( i = 0; i < 5; i++)
     {
         check = graph->array[i].head;
         printf("Node pid=%d -> { ", i);
@@ -227,20 +231,20 @@ void rag_print(Graph *graph)
             printf("lockid=%d ", check->id);
             check = check->next;
         }
-        printf(" }\n");
+        printf("}\n");
     }
 
-    //for ( i = NPROC; i < (NPROC + NLOCK); i++)
-    for ( i = 5; i < 8; i++)
+    for ( i = NPROC; i < (NPROC + NLOCK); i++)
+    //for ( i = 5; i < 8; i++)
     {
         check = graph->array[i].head;
-        printf("Node lockid=%d -> { ", i);
+        printf("Node lockid=%d -> { ", graph->array[i].id);
         while (check != NULL)
         {
             printf("pid=%d ", check->id);
             check = check->next;
         }
-        printf(" }\n");
+        printf("}\n");
     }
 }
 
@@ -248,13 +252,74 @@ void rag_print(Graph *graph)
  *
  *
  */
-void deadlock_detect(Graph *graph)
+int deadlock_detect(Graph *g)
 {
-    //
+    int visited[g->V];
+    int rec[g->V];
+    for (int i = 0; i < g->V; i++)
+    {
+        visited[i] = 0;
+        rec[i] = 0;
+    }
+
+    for (int i = 0; i < g->V; i++)
+    {
+        if (isCycle(i, visited, rec, g))
+        {
+            int remember = stack->head->id;
+            if (stack->head->lockOrProc == LOCK)
+            {
+                remember += NPROC;
+            }
+            AdjListNode *check = stack->head->next;
+            printf("DEADLOCK\t");
+            if (stack->head->lockOrProc == LOCK)
+            {
+                printf("lockid=%d ", stack->head->id);
+            }
+            else
+            {
+                printf("pid=%d ", stack->head->id);
+            }
+            while(check != NULL)
+            {
+                if (check->lockOrProc == LOCK)
+                {
+                    if (remember == (check->id + NPROC)){
+                        printf("lockid=%d ", check->id);
+                        break;
+                    }
+                    printf("lockid=%d ", check->id);
+                }
+                else{
+                    if (remember == check->id){
+                        printf("pid=%d ", check->id);
+                        break;
+                    }
+                    printf("pid=%d ", check->id);
+                }
+
+                check = check->next;
+            }
+            printf("\n");
+            /*
+            check = stack->head;
+            while (check != NULL)
+            {
+                stack->head = check->next;
+                free(check);
+                check = stack->head;
+            }
+            free(stack);
+            */
+            return 1;
+        }
+    }
+    return 0;
 }
 
-/*
-int icCycle(int i, int *visited, int *recStack, Graph *graph)
+
+int isCycle(int i, int *visited, int *recStack, Graph *graph)
 {
     if (recStack[i])
     {
@@ -267,14 +332,37 @@ int icCycle(int i, int *visited, int *recStack, Graph *graph)
     }
 
     visited[i] = 1;
-
     recStack[i] = 1;
-    AdjList *array = graph->array[i];
 
-    AdjListNode *check = array->head;
+    AdjList *array = graph->array;
+
+    /*
+    int j;
+    for (j = 0; j < graph->V; j++)
+    {
+        if (array[i].head != NULL)
+        {
+            printf("%d ", array[i].head->id);
+        }
+    }
+    printf("\n");
+    */
+
+    AdjListNode *check = array[i].head;
+
+    // add node to stack
+    AdjListNode *stackNode = newAdjListNode(check->id, check->lockOrProc);
+    stackNode->next = stack->head;
+    stack->head = stackNode;
+
     while (check != NULL)
     {
-        if (isCycle(check->id, visited, recStack, graph))
+        int iCalc = check->id;
+        if (check->lockOrProc == LOCK)
+        {
+            iCalc += NPROC;
+        }
+        if (isCycle(iCalc, visited, recStack, graph))
         {
             return 1;
         }
@@ -284,4 +372,3 @@ int icCycle(int i, int *visited, int *recStack, Graph *graph)
     recStack[i] = 0;
     return 0;
 }
-*/

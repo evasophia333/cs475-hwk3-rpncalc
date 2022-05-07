@@ -25,4 +25,5 @@ void rag_request(Graph *graph, int pid, int lockid);
 void rag_alloc(Graph *graph, int pid, int lockid);
 void rag_dealloc(Graph *graph, int pid, int lockid);
 void rag_print(Graph *graph);
-void deadlock_detect(Graph *graph);
+int deadlock_detect(Graph *graph);
+int isCycle(int i, int *visited, int *recStack, Graph *graph);
